@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User CRUD - Mobile Friendly</title>
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --success-color: #059669;
+        --danger-color: #ef4444;
+        --bg-color: #f1f5f9;
+        --card-bg: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, system-ui, sans-serif;
+        background-color: var(--bg-color);
+        color: #1e293b;
+        margin: 0;
+        padding: 15px; /* 手機版邊距縮小 */
+      }
+
+      .container {
+        max-width: 600px;
+        margin: auto;
+      }
+
+      h2 {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 1.5rem;
+      }
+
+      /* 表單區域 - 響應式設計 */
+      .user-form {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column; /* 預設手機垂直排列 */
+        gap: 15px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+      }
+
+      input {
+        padding: 12px; /* 加大輸入框方便手指點擊 */
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 16px; /* 防止 iOS 輸入時自動縮放 */
+        outline: none;
+      }
+
+      #addBtn {
+        background: var(--primary-color);
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      /* 列表區域 */
+      #userList {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column; /* 手機上文字上下排列 */
+        gap: 4px;
+      }
+
+      .user-info strong {
+        font-size: 1.05rem;
+      }
+
+      .meta-data {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #64748b;
+      }
+
+      .badge {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .icon-btn {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .edit-btn {
+        background: #f1f5f9;
+        color: #475569;
+      }
+      .del-btn {
+        background: #fee2e2;
+        color: var(--danger-color);
+      }
+
+      /* --- 媒體查詢：電腦版優化 --- */
+      @media (min-width: 480px) {
+        .user-form {
+          flex-direction: row; /* 寬螢幕改回水平 */
+          align-items: flex-end;
+          flex-wrap: wrap;
+        }
+        .form-group {
+          flex: 1;
+          min-width: 120px;
+        }
+        #addBtn {
+          width: auto;
+          padding: 12px 24px;
+        }
+        .user-info {
+          flex-direction: row;
+          align-items: center;
+        }
+      }
+
+      .status-box {
+        text-align: center;
+        padding: 30px;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>DB 管理系統</h2>
+
+      <div class="user-form">
+        <div class="form-group">
+          <label>姓名</label>
+          <input type="text" id="userName" placeholder="請輸入姓名" />
+        </div>
+        <div class="form-group">
+          <label>年齡</label>
+          <input type="number" id="userAge" placeholder="年齡" />
+        </div>
+        <div class="form-group">
+          <label>角色</label>
+          <input type="text" id="userRole" placeholder="Role" />
+        </div>
+        <button id="addBtn">新增使用者</button>
+      </div>
+
+      <div id="userList"><div class="status-box">載入中...</div></div>
+    </div>
+
+    <script>
+      const API_URL = 'https://node-zeabur-postgresql.zeabur.app/users'
+      let isEditing = null // 追蹤目前是否處於編輯狀態 (儲存 ID)
+
+      // --- 1. API 邏輯層 (Data Access) ---
+      const UserAPI = {
+        async request(url, options = {}) {
+          try {
+            const res = await fetch(url, options)
+            const result = await res.json()
+            if (!result.success) throw new Error(result.message || '請求失敗')
+            return result
+          } catch (err) {
+            console.error('API Error:', err)
+            throw err
+          }
+        },
+        getAll() {
+          return this.request(API_URL)
+        },
+        create(data) {
+          return this.request(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          })
+        },
+        update(id, data) {
+          return this.request(`${API_URL}/${id}`, {
+            method: 'PATCH', // 或 PUT，根據後端定義
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          })
+        },
+        delete(id) {
+          return this.request(`${API_URL}/${id}`, { method: 'DELETE' })
+        },
+      }
+
+      // --- 2. UI 渲染層 ---
+      const renderUsers = async () => {
+        const listContainer = document.getElementById('userList')
+        try {
+          const result = await UserAPI.getAll()
+
+          if (result.data.length === 0) {
+            listContainer.innerHTML = '<div class="empty-state">目前暫無使用者資料</div>'
+            return
+          }
+
+          listContainer.innerHTML = result.data
+            .map(
+              (user) => `
+            <div class="user-item">
+              <div class="user-info">
+                <strong>${user.name}</strong>
+                <span>(${user.age} 歲)</span>
+                <span class="badge">${user.role || 'User'}</span>
+              </div>
+              <div class="actions">
+                <button class="edit-btn" 
+                        data-id="${user._id}" 
+                        data-name="${user.name}" 
+                        data-age="${user.age}" 
+                        data-role="${user.role}">編輯</button>
+                <button class="del-btn" data-id="${user._id}">刪除</button>
+              </div>
+            </div>
+          `,
+            )
+            .join('')
+        } catch (err) {
+          listContainer.innerHTML = `<div class="empty-state" style="color:red">錯誤: ${err.message}</div>`
+        }
+      }
+
+      // --- 3. 事件處理層 ---
+      const nameInput = document.getElementById('userName')
+      const ageInput = document.getElementById('userAge')
+      const roleInput = document.getElementById('userRole')
+      const addBtn = document.getElementById('addBtn')
+
+      // 重設表單
+      const resetForm = () => {
+        isEditing = null
+        nameInput.value = ''
+        ageInput.value = ''
+        roleInput.value = ''
+        addBtn.innerText = '新增使用者'
+        addBtn.style.background = ''
+      }
+
+      // 新增或更新
+      addBtn.addEventListener('click', async () => {
+        const payload = {
+          name: nameInput.value.trim(),
+          age: parseInt(ageInput.value),
+          role: roleInput.value.trim(),
+        }
+
+        if (!payload.name || isNaN(payload.age)) return alert('請檢查姓名與年齡')
+
+        addBtn.disabled = true
+        try {
+          if (isEditing) {
+            await UserAPI.update(isEditing, payload)
+          } else {
+            await UserAPI.create(payload)
+          }
+          resetForm()
+          await renderUsers()
+        } catch (err) {
+          alert(isEditing ? '更新失敗' : '新增失敗')
+        } finally {
+          addBtn.disabled = false
+        }
+      })
+
+      // 列表點擊代理 (刪除 & 編輯)
+      document.getElementById('userList').addEventListener('click', async (e) => {
+        const id = e.target.dataset.id
+
+        // 刪除邏輯
+        if (e.target.classList.contains('del-btn')) {
+          if (!confirm('確定刪除此使用者？')) return
+          try {
+            await UserAPI.delete(id)
+            renderUsers()
+          } catch (err) {
+            alert('刪除失敗')
+          }
+        }
+
+        // 編輯邏輯 (將資料填回表單)
+        if (e.target.classList.contains('edit-btn')) {
+          isEditing = id
+          nameInput.value = e.target.dataset.name
+          ageInput.value = e.target.dataset.age
+          roleInput.value = e.target.dataset.role
+
+          addBtn.innerText = '儲存更新'
+          addBtn.style.background = '#059669' // 變更顏色提示正在編輯
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      })
+
+      document.addEventListener('DOMContentLoaded', renderUsers)
+    </script>
+  </body>
+</html>

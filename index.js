@@ -1,10 +1,16 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // 1. 引入 cors
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
+
+// 2. 啟用 CORS
+// 預設 app.use(cors()) 會允許所有網域請求
+// 實務上可以設定為 app.use(cors({ origin: 'http://127.0.0.1:8080' }))
+app.use(cors());
 
 app.use(bodyParser.json());
 
