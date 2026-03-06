@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 // 實務上可以設定為 app.use(cors({ origin: 'http://127.0.0.1:8080' }))
 app.use(cors());
 
+
 app.use(bodyParser.json());
 
 // 1. Create - 新增使用者
@@ -44,7 +45,7 @@ app.get('/users/:id', async (req, res) => {
 });
 
 // 4. Update - 更新使用者
-app.put('/users/:id', async (req, res) => {
+app.patch('/users/:id', async (req, res) => {
   const { id } = req.params;
   const { name, age, role } = req.body;
   try {

@@ -204,9 +204,9 @@
         async request(url, options = {}) {
           try {
             const res = await fetch(url, options)
-            const result = await res.json()
-            if (!result.success) throw new Error(result.message || '請求失敗')
-            return result
+            // 注意：這裡直接回傳解析後的 JSON (即陣列或單一物件)
+            if (!res.ok) throw new Error('網路請求失敗')
+            return await res.json()
           } catch (err) {
             console.error('API Error:', err)
             throw err
@@ -224,7 +224,7 @@
         },
         update(id, data) {
           return this.request(`${API_URL}/${id}`, {
-            method: 'PATCH', // 或 PUT，根據後端定義
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
           })
@@ -238,32 +238,33 @@
       const renderUsers = async () => {
         const listContainer = document.getElementById('userList')
         try {
-          const result = await UserAPI.getAll()
+          // 現在 result 直接就是 [{}, {}, ...]
+          const users = await UserAPI.getAll()
 
-          if (result.data.length === 0) {
+          if (users.length === 0) {
             listContainer.innerHTML = '<div class="empty-state">目前暫無使用者資料</div>'
             return
           }
 
-          listContainer.innerHTML = result.data
+          listContainer.innerHTML = users
             .map(
               (user) => `
-            <div class="user-item">
-              <div class="user-info">
-                <strong>${user.name}</strong>
-                <span>(${user.age} 歲)</span>
-                <span class="badge">${user.role || 'User'}</span>
-              </div>
-              <div class="actions">
-                <button class="edit-btn" 
-                        data-id="${user._id}" 
-                        data-name="${user.name}" 
-                        data-age="${user.age}" 
-                        data-role="${user.role}">編輯</button>
-                <button class="del-btn" data-id="${user._id}">刪除</button>
-              </div>
-            </div>
-          `,
+        <div class="user-item">
+          <div class="user-info">
+            <strong>${user.name}</strong>
+            <span>(${user.age} 歲)</span>
+            <span class="badge">${user.role || 'User'}</span>
+          </div>
+          <div class="actions">
+            <button class="edit-btn" 
+                    data-id="${user.id}" 
+                    data-name="${user.name}" 
+                    data-age="${user.age}" 
+                    data-role="${user.role}">編輯</button>
+            <button class="del-btn" data-id="${user.id}">刪除</button>
+          </div>
+        </div>
+      `,
             )
             .join('')
         } catch (err) {
@@ -277,7 +278,6 @@
       const roleInput = document.getElementById('userRole')
       const addBtn = document.getElementById('addBtn')
 
-      // 重設表單
       const resetForm = () => {
         isEditing = null
         nameInput.value = ''
@@ -287,12 +287,11 @@
         addBtn.style.background = ''
       }
 
-      // 新增或更新
       addBtn.addEventListener('click', async () => {
         const payload = {
           name: nameInput.value.trim(),
           age: parseInt(ageInput.value),
-          role: roleInput.value.trim(),
+          role: roleInput.value.trim() || 'user',
         }
 
         if (!payload.name || isNaN(payload.age)) return alert('請檢查姓名與年齡')
@@ -313,11 +312,9 @@
         }
       })
 
-      // 列表點擊代理 (刪除 & 編輯)
       document.getElementById('userList').addEventListener('click', async (e) => {
         const id = e.target.dataset.id
 
-        // 刪除邏輯
         if (e.target.classList.contains('del-btn')) {
           if (!confirm('確定刪除此使用者？')) return
           try {
@@ -328,7 +325,6 @@
           }
         }
 
-        // 編輯邏輯 (將資料填回表單)
         if (e.target.classList.contains('edit-btn')) {
           isEditing = id
           nameInput.value = e.target.dataset.name
@@ -336,7 +332,7 @@
           roleInput.value = e.target.dataset.role
 
           addBtn.innerText = '儲存更新'
-          addBtn.style.background = '#059669' // 變更顏色提示正在編輯
+          addBtn.style.background = '#059669'
           window.scrollTo({ top: 0, behavior: 'smooth' })
         }
       })
