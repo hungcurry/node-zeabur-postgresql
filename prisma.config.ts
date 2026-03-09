@@ -1,16 +1,17 @@
 import { defineConfig } from '@prisma/config';
 
-// 確保環境變數存在，且型別為 string
+// 1. 確保環境變數存在
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not defined. Please check your .env file.');
+  throw new Error('DATABASE_URL is not defined in .env file');
 }
 
 export default defineConfig({
-  // PostgreSQL 專案建議使用 "classic"
+  // Prisma 7 必須明確指定引擎類型，Node.js 環境建議用 classic
   engine: 'classic', 
   datasource: {
+    // 這裡的 key (db) 必須對應 schema.prisma 裡的 datasource 名稱
     url: databaseUrl,
   },
 });
