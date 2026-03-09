@@ -4,9 +4,10 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon --exec tsx index.ts",
+    "dev": "prisma generate && nodemon --exec tsx index.ts",
     "build": "prisma generate && tsc",
-    "start": "prisma db push --skip-generate && node dist/index.js"
+    "start": "prisma generate && prisma db push && node dist/index.js",
+    "db:push": "prisma db push"
   },
   "keywords": [],
   "author": "",
