@@ -1,10 +1,13 @@
 {
-  "name": "zeabur-postgresql",
+  "name": "node-zeabur-postgresql",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "npx prisma generate && npx prisma db push && node index.js",
-    "build": "npx prisma generate"
+    "dev": "prisma generate && nodemon --exec tsx index.ts",
+    "build": "prisma generate && tsc",
+    "start": "prisma generate && prisma db push && node dist/index.js",
+    "db:push": "prisma db push"
   },
   "keywords": [],
   "author": "",
@@ -14,9 +17,17 @@
     "@prisma/client": "^6.19.2",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "prisma": "^6.19.2"
+    "@types/body-parser": "^1.19.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.19.37",
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

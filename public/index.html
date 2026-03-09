@@ -172,6 +172,7 @@
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <h2>DB 管理系統</h2>
@@ -194,150 +195,150 @@
 
       <div id="userList"><div class="status-box">載入中...</div></div>
     </div>
-
-    <script>
-      const API_URL = 'https://node-zeabur-postgresql.zeabur.app/users'
-      let isEditing = null // 追蹤目前是否處於編輯狀態 (儲存 ID)
-
-      // --- 1. API 邏輯層 (Data Access) ---
-      const UserAPI = {
-        async request(url, options = {}) {
-          try {
-            const res = await fetch(url, options)
-            // 注意：這裡直接回傳解析後的 JSON (即陣列或單一物件)
-            if (!res.ok) throw new Error('網路請求失敗')
-            return await res.json()
-          } catch (err) {
-            console.error('API Error:', err)
-            throw err
-          }
-        },
-        getAll() {
-          return this.request(API_URL)
-        },
-        create(data) {
-          return this.request(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          })
-        },
-        update(id, data) {
-          return this.request(`${API_URL}/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          })
-        },
-        delete(id) {
-          return this.request(`${API_URL}/${id}`, { method: 'DELETE' })
-        },
-      }
-
-      // --- 2. UI 渲染層 ---
-      const renderUsers = async () => {
-        const listContainer = document.getElementById('userList')
-        try {
-          // 現在 result 直接就是 [{}, {}, ...]
-          const users = await UserAPI.getAll()
-
-          if (users.length === 0) {
-            listContainer.innerHTML = '<div class="empty-state">目前暫無使用者資料</div>'
-            return
-          }
-
-          listContainer.innerHTML = users
-            .map(
-              (user) => `
-        <div class="user-item">
-          <div class="user-info">
-            <strong>${user.name}</strong>
-            <span>(${user.age} 歲)</span>
-            <span class="badge">${user.role || 'User'}</span>
-          </div>
-          <div class="actions">
-            <button class="edit-btn" 
-                    data-id="${user.id}" 
-                    data-name="${user.name}" 
-                    data-age="${user.age}" 
-                    data-role="${user.role}">編輯</button>
-            <button class="del-btn" data-id="${user.id}">刪除</button>
-          </div>
-        </div>
-      `,
-            )
-            .join('')
-        } catch (err) {
-          listContainer.innerHTML = `<div class="empty-state" style="color:red">錯誤: ${err.message}</div>`
-        }
-      }
-
-      // --- 3. 事件處理層 ---
-      const nameInput = document.getElementById('userName')
-      const ageInput = document.getElementById('userAge')
-      const roleInput = document.getElementById('userRole')
-      const addBtn = document.getElementById('addBtn')
-
-      const resetForm = () => {
-        isEditing = null
-        nameInput.value = ''
-        ageInput.value = ''
-        roleInput.value = ''
-        addBtn.innerText = '新增使用者'
-        addBtn.style.background = ''
-      }
-
-      addBtn.addEventListener('click', async () => {
-        const payload = {
-          name: nameInput.value.trim(),
-          age: parseInt(ageInput.value),
-          role: roleInput.value.trim() || 'user',
-        }
-
-        if (!payload.name || isNaN(payload.age)) return alert('請檢查姓名與年齡')
-
-        addBtn.disabled = true
-        try {
-          if (isEditing) {
-            await UserAPI.update(isEditing, payload)
-          } else {
-            await UserAPI.create(payload)
-          }
-          resetForm()
-          await renderUsers()
-        } catch (err) {
-          alert(isEditing ? '更新失敗' : '新增失敗')
-        } finally {
-          addBtn.disabled = false
-        }
-      })
-
-      document.getElementById('userList').addEventListener('click', async (e) => {
-        const id = e.target.dataset.id
-
-        if (e.target.classList.contains('del-btn')) {
-          if (!confirm('確定刪除此使用者？')) return
-          try {
-            await UserAPI.delete(id)
-            renderUsers()
-          } catch (err) {
-            alert('刪除失敗')
-          }
-        }
-
-        if (e.target.classList.contains('edit-btn')) {
-          isEditing = id
-          nameInput.value = e.target.dataset.name
-          ageInput.value = e.target.dataset.age
-          roleInput.value = e.target.dataset.role
-
-          addBtn.innerText = '儲存更新'
-          addBtn.style.background = '#059669'
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
-      })
-
-      document.addEventListener('DOMContentLoaded', renderUsers)
-    </script>
   </body>
+
+  <script>
+    const API_URL = 'https://node-zeabur-postgresql.zeabur.app/users'
+    let isEditing = null // 追蹤目前是否處於編輯狀態 (儲存 ID)
+
+    // --- 1. API 邏輯層 (Data Access) ---
+    const UserAPI = {
+      async request(url, options = {}) {
+        try {
+          const res = await fetch(url, options)
+          // 注意：這裡直接回傳解析後的 JSON (即陣列或單一物件)
+          if (!res.ok) throw new Error('網路請求失敗')
+          return await res.json()
+        } catch (err) {
+          console.error('API Error:', err)
+          throw err
+        }
+      },
+      getAll() {
+        return this.request(API_URL)
+      },
+      create(data) {
+        return this.request(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      },
+      update(id, data) {
+        return this.request(`${API_URL}/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+      },
+      delete(id) {
+        return this.request(`${API_URL}/${id}`, { method: 'DELETE' })
+      },
+    }
+
+    // --- 2. UI 渲染層 ---
+    const renderUsers = async () => {
+      const listContainer = document.getElementById('userList')
+      try {
+        // 現在 result 直接就是 [{}, {}, ...]
+        const users = await UserAPI.getAll()
+
+        if (users.length === 0) {
+          listContainer.innerHTML = '<div class="empty-state">目前暫無使用者資料</div>'
+          return
+        }
+
+        listContainer.innerHTML = users
+          .map(
+            (user) => `
+      <div class="user-item">
+        <div class="user-info">
+          <strong>${user.name}</strong>
+          <span>(${user.age} 歲)</span>
+          <span class="badge">${user.role || 'User'}</span>
+        </div>
+        <div class="actions">
+          <button class="edit-btn" 
+                  data-id="${user.id}" 
+                  data-name="${user.name}" 
+                  data-age="${user.age}" 
+                  data-role="${user.role}">編輯</button>
+          <button class="del-btn" data-id="${user.id}">刪除</button>
+        </div>
+      </div>
+    `,
+          )
+          .join('')
+      } catch (err) {
+        listContainer.innerHTML = `<div class="empty-state" style="color:red">錯誤: ${err.message}</div>`
+      }
+    }
+
+    // --- 3. 事件處理層 ---
+    const nameInput = document.getElementById('userName')
+    const ageInput = document.getElementById('userAge')
+    const roleInput = document.getElementById('userRole')
+    const addBtn = document.getElementById('addBtn')
+
+    const resetForm = () => {
+      isEditing = null
+      nameInput.value = ''
+      ageInput.value = ''
+      roleInput.value = ''
+      addBtn.innerText = '新增使用者'
+      addBtn.style.background = ''
+    }
+
+    addBtn.addEventListener('click', async () => {
+      const payload = {
+        name: nameInput.value.trim(),
+        age: parseInt(ageInput.value),
+        role: roleInput.value.trim() || 'user',
+      }
+
+      if (!payload.name || isNaN(payload.age)) return alert('請檢查姓名與年齡')
+
+      addBtn.disabled = true
+      try {
+        if (isEditing) {
+          await UserAPI.update(isEditing, payload)
+        } else {
+          await UserAPI.create(payload)
+        }
+        resetForm()
+        await renderUsers()
+      } catch (err) {
+        alert(isEditing ? '更新失敗' : '新增失敗')
+      } finally {
+        addBtn.disabled = false
+      }
+    })
+
+    document.getElementById('userList').addEventListener('click', async (e) => {
+      const id = e.target.dataset.id
+
+      if (e.target.classList.contains('del-btn')) {
+        if (!confirm('確定刪除此使用者？')) return
+        try {
+          await UserAPI.delete(id)
+          renderUsers()
+        } catch (err) {
+          alert('刪除失敗')
+        }
+      }
+
+      if (e.target.classList.contains('edit-btn')) {
+        isEditing = id
+        nameInput.value = e.target.dataset.name
+        ageInput.value = e.target.dataset.age
+        roleInput.value = e.target.dataset.role
+
+        addBtn.innerText = '儲存更新'
+        addBtn.style.background = '#059669'
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    })
+
+    document.addEventListener('DOMContentLoaded', renderUsers)
+  </script>
 </html>
