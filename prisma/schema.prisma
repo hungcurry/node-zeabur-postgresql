@@ -1,11 +1,30 @@
+// 定義 Prisma Client 的生成方式
+// 這會告訴 Prisma 生成適用於 JavaScript/TypeScript 的查詢建構器 (Query Builder)
 generator client {
   provider = "prisma-client-js"
 }
 
+// 定義資料庫連線設定
 datasource db {
+  // 指定資料庫類型為 PostgreSQL
   provider = "postgresql"
 }
 
+
+//   id 欄位：
+//   @id：標記為主鍵 (Primary Key)
+//   @default(autoincrement())：預設值為自動遞增（1, 2, 3...）
+//   id    Int     @id @default(autoincrement())
+
+//   name 欄位：字串型別，不可為空 (Required)
+//   name  String
+
+//   age 欄位：整數型別，不可為空
+//   age   Int
+
+//   role 欄位：字串型別
+//   @default("user")：若新增資料時未指定值，則預設為 "user"
+//   role  String  @default("user")
 model User {
   id    Int     @id @default(autoincrement())
   name  String
