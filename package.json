@@ -4,25 +4,27 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "prisma generate && nodemon --exec tsx index.ts",
+    "dev": "nodemon --exec tsx index.ts",
     "build": "prisma generate && tsc",
-    "start": "prisma generate && prisma db push && node dist/index.js",
-    "db:push": "prisma db push"
+    "start": "prisma migrate deploy && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.5",
+    "@types/pg": "^8.18.0",
     "nodemon": "^3.1.14",
     "prisma": "^7.4.2",
     "tsx": "^4.21.0",
