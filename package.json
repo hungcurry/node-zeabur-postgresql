@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec tsx index.ts",
     "build": "prisma generate && tsc",
-    "start": "prisma migrate deploy && node dist/index.js"
+    "start": "prisma db push --skip-generate && node dist/index.js"
   },
   "keywords": [],
   "author": "",
