@@ -37,6 +37,13 @@ node-zeabur-postgresql/
 └── tsconfig.json             # 建議使用 NodeNext 或 ESNext 模組規範
 ```
 
+```jsx
+npm install @prisma/client
+npm install prisma --save-dev
+
+// 每當你修改了 schema.prisma，都必須執行：
+npx prisma generate
+```
 
 ```jsx
 "scripts": {
@@ -57,8 +64,10 @@ start (Zeabur 運行階段):
 prisma db push: 這很重要！因為 Zeabur 的資料庫可能是空的，這行會自動幫你在雲端建立資料表。
 node dist/index.js: 執行編譯後的正式版程式碼。
 
-
-db:push 是你的 「手動同步工具」。
+db:push (是你的 「手動同步工具」。):
 在開發過程中，當你修改了 prisma/schema.prisma
 例如新增了一個欄位或一張表），資料庫並不會自動知道這件事。這時候你就需要執行 npm run db:push。
 ```
+
+
+

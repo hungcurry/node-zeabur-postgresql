@@ -14,19 +14,17 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.19.2",
-    "body-parser": "^2.2.2",
+    "@prisma/client": "^7.4.2",
     "cors": "^2.8.6",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.19.6",
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.0",
-    "@types/node": "^20.19.37",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.5",
     "nodemon": "^3.1.14",
-    "prisma": "^6.19.2",
+    "prisma": "^7.4.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
