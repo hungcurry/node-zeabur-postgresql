@@ -41,6 +41,10 @@ node-zeabur-postgresql/
 npm install @prisma/client
 npm install prisma --save-dev
 
+// Prisma 7 需要 PG 來連線資料庫
+npm install @prisma/adapter-pg pg
+npm install -D @types/pg
+
 // 每當你修改了 schema.prisma，都必須執行：
 npx prisma generate
 ```
